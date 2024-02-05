@@ -40,7 +40,7 @@ The first statement in a Go source file must be `pacage name`. Executable comman
 
 Using the `os.Create`library we can create single file in the current directory.
 
-If we enter something different like a path, we get the follwoing error
+If we enter something different like a path with a folder that doesn't exist, we get the follwoing error
 
 ```sh
 open /newDIr/testFIle.txt: no such file or directory
@@ -75,3 +75,7 @@ Mode: r (read), w(write), x(execute)
 - By group:  rwxr-x--- groups of 3 characters
 - Numerical: 0754 four digits for 3 groups and 1 special flag.
 - Symbolic: reference class [operator] [mode]
+
+If you create a file without a prior check if the file exist it will override it and create a new one, deleting all the content
+of the named file.
+

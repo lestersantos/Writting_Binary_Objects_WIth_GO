@@ -25,7 +25,7 @@ type Course struct{
 // 2. Ver registros
 // 3. salir
 
-var fileName string  = "./newDir/test.txt" 
+var fileName string  = "./newDir2/test.txt" 
 
 func main(){
 	menu()
@@ -43,9 +43,9 @@ func menu() {
 		switch option {
 		case 1:
 			fmt.Println("Create a default file called testFIle.txt")
-			//checkIfPathExist()
-			//createFIle()
+
 			createDirectory(fileName)
+			createFIle(fileName)
 		case 2:
 			fmt.Println("You chose Option 2")
 		case 3:
@@ -69,17 +69,20 @@ func getUserInput(prompt string) int {
 	return input
 }
 
-func createFIle(){
-	f, err := os.Create("/newDIr/testFIle.txt")
+func createFIle(path string){
 
-	fmt.Println(err)
-	if err != nil {
-		log.Fatal(err)
+	//name := filepath.Base(path)
+	name := path
+	if ifPathExist(name) == false{
+		f, err := os.Create(name)
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer f.Close()
+
+		fmt.Println(f.Name())
+		fmt.Printf("File %s created succesfully\n",f.Name())	
 	}
-
-	defer f.Close()
-
-	fmt.Println(f.Name())
 }
 
 func ifPathExist(path string) bool{
