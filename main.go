@@ -3,7 +3,9 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"log"
 	"os"
+	"path/filepath"
 	"strconv"
 )
 
@@ -23,6 +25,8 @@ type Course struct{
 // 2. Ver registros
 // 3. salir
 
+var fileName string  = "./newDir/test.txt" 
+
 func main(){
 	menu()
 }
@@ -38,7 +42,10 @@ func menu() {
 
 		switch option {
 		case 1:
-			fmt.Println("You chose Option 1")
+			fmt.Println("Create a default file called testFIle.txt")
+			//checkIfPathExist()
+			//createFIle()
+			createDirectory(fileName)
 		case 2:
 			fmt.Println("You chose Option 2")
 		case 3:
@@ -60,4 +67,50 @@ func getUserInput(prompt string) int {
 		return getUserInput(prompt)
 	}
 	return input
+}
+
+func createFIle(){
+	f, err := os.Create("/newDIr/testFIle.txt")
+
+	fmt.Println(err)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer f.Close()
+
+	fmt.Println(f.Name())
+}
+
+func ifPathExist(path string) bool{
+	exist := false
+
+	_, err := os.Stat(path)
+
+	fmt.Printf("%T",err)
+	fmt.Println(err)
+
+	if err == nil {
+		fmt.Println("File or directory exists.")
+		exist = true
+	} else if os.IsNotExist(err){
+		fmt.Println("File or directory does not exist")
+	} else {
+		fmt.Println("Error occurred:", err)
+		log.Fatal(err)
+	}
+	return exist
+}
+
+func createDirectory(path string) {
+
+	dirPath := filepath.Dir(path)
+	
+	if ifPathExist(dirPath) == false{
+		err := os.MkdirAll(dirPath, 0777)
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Printf("Directory %s created succesfully\n",dirPath)	
+	}
 }
