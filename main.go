@@ -11,12 +11,6 @@ import (
 	"strings"
 )
 
-// 1. Object Course
-// - type: Boolean
-// - Id: int
-// - Code: int
-// - Name: char[16]
-
 type Course struct{
 	Type bool
 	Id int32
@@ -24,10 +18,6 @@ type Course struct{
 	Name [16]byte
 }
 
-// Application menu
-// 1. registro curso
-// 2. Ver registros
-// 3. salir
 
 var fileName string  = "./ht/test.txt" 
 var currentOffset int64
@@ -48,12 +38,19 @@ func main(){
 		updateWritePointer(file)
 		defer file.Close()	
 	}
-	
+
+
 	menu()
 }
 
 func menu() {
 	for {
+		fmt.Println(strings.Repeat("-",60))
+		fmt.Println("\t\t   HOJA DE TRABAJO No.1 ")
+		fmt.Println("\t\t   Lester Efrain Ajucum Santos ")
+		fmt.Println("\t\t   201504510 ")
+		fmt.Println(strings.Repeat("-",60))
+
 		fmt.Println("Select an option:")
 		fmt.Println("1. Registro curso")
 		fmt.Println("2. Ver registros")
@@ -92,17 +89,15 @@ func courseRegister(){
 	var newCourse Course
 
 	// Prompt the user for input
+	fmt.Println(strings.Repeat("-",60))
 	fmt.Println("REGISTRO DE CURSO")
+	fmt.Println(strings.Repeat("-",60))
 	scanner := bufio.NewScanner(os.Stdin)
 
 	fmt.Print("Enter Name: ")
 	scanner.Scan()
 	copy(newCourse.Name[:],scanner.Bytes())
 
-	// fmt.Print("Enter ID: ")
-	// scanner.Scan()
-	// i64,_:= strconv.ParseInt(scanner.Text(),10,32)
-	// newCourse.Id = int32(i64)
 	newCourse.Id = currentId + 1
 	currentId += 1;
 
@@ -115,8 +110,6 @@ func courseRegister(){
 	scanner.Scan()
 	newCourse.Type,_ = strconv.ParseBool(scanner.Text())
 
-	fmt.Println("Object to write:",newCourse)
-	
 	file, err := openFile(fileName)
 	if err != nil {
 		return
@@ -129,52 +122,13 @@ func courseRegister(){
 	currentOffset += int64(binary.Size(newCourse))
 
 	readAll(file)
-	// var tempCourse Course
 
-	// if err := ReadObject(file, &tempCourse, int64(0*binary.Size(tempCourse) + 0)); err != nil {
-	// 	return
-	// }
-
-	// printObject(tempCourse)
-
-	// if err := ReadObject(file, &tempCourse, int64(1*binary.Size(tempCourse) + 0)); err != nil {
-	// 	return
-	// }
-
-	// printObject(tempCourse)
-	// // Writing 10 objects to the file
-	// for i := 0; i < 10; i++ {
-	// 	// Set values to newData
-	// 	copy(newData.Name[:], "Sergie")
-	// 	newData.Id = int32(i+1)
-
-	// 	// Write object in bin file
-	// 	if err := writeObjectToFile(file,newData,int64(i * binary.Size(newData))); err != nil {
-	// 		return
-	// 	}
-	// }
-
-	// // Read 10 objects from bin file
-	// for i := 0; i < 10; i++ {
-	// 	var TempData Course
-	// 	// Read object from bin file
-	// 	if err := ReadObject(file, &TempData, int64(i * binary.Size(TempData) + 0)); err != nil {
-	// 		return
-	// 	}
-
-	// 	// Print object
-	// 	PrintData(TempData)
-	// }
-	
-
-	// Close bin file
 	defer file.Close()
 }
 
 func writeObjectToFile(file *os.File, data interface{}, offset  int64) error {
-	tempOffset, _ := file.Seek(offset, 0)
-	fmt.Println("Last Offset: ",tempOffset)
-
+	file.Seek(offset, 0)
+	
 	err := binary.Write(file, binary.LittleEndian, data)
 	if err != nil {
 		fmt.Println("Err WriteObject==",err)
@@ -237,7 +191,6 @@ func updateWritePointer(file *os.File) error {
 		}else {
 			tempOffset,_= file.Seek(tempOffset+int64(binary.Size(tempCourse)),0)
 			currentOffset = tempOffset
-			fmt.Println("Updating position: ",tempOffset)
 		}
 
 	}
