@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"encoding/binary"
 	"fmt"
 	"log"
 	"os"
@@ -16,8 +17,10 @@ import (
 // - Name: char[16]
 
 type Course struct{
-	id int
-	code int
+	Type bool
+	Id int32
+	Code int32
+	Name [16]byte
 }
 
 // Application menu
@@ -25,9 +28,24 @@ type Course struct{
 // 2. Ver registros
 // 3. salir
 
-var fileName string  = "./newDir2/test.txt" 
+var fileName string  = "./ht/test.txt" 
+var currentOffset int64
 
 func main(){
+	if ifFilePathExist(fileName) == false {
+		createDirectory(fileName)
+		createFile(fileName)
+		currentOffset = 0
+	}else{
+		file, err := openFile(fileName)
+		if err != nil {
+			return
+		}
+		
+		updateWritePointer(file)
+		defer file.Close()	
+	}
+	
 	menu()
 }
 
@@ -45,7 +63,8 @@ func menu() {
 			fmt.Println("Create a default file called testFIle.txt")
 			courseRegister()
 		case 2:
-			fmt.Println("You chose Option 2")
+			fmt.Println("Showing database...")
+			showRegisters()
 		case 3:
 			fmt.Println("Exiting...")
 			os.Exit(0)
@@ -55,19 +74,182 @@ func menu() {
 	}
 }
 
+func showRegisters(){
+	// Open bin file
+	file, err := openFile(fileName)
+	if err != nil {
+		return
+	}
+	defer file.Close()
+	
+	readAll(file)
+}
+
 func courseRegister(){
 	
-	if ifFilePathExist(fileName) == false {
-		createDirectory(fileName)
-		createFile(fileName)
-	}
+	// type Course struct{
+	// 	Type bool
+	// 	Id int32
+	// 	Code int32
+	// 	Name [16]byte
+	// }
+	
+	var newCourse Course
+	// newCourse.Type = true
+	// newCourse.Id = 0
+	// newCourse.Code = 2020
+	// copy(newCourse.Name[:],"Archivos")
 
-	err := readFile(fileName)
 
+	// Prompt the user for input
+	fmt.Println("REGISTRO DE CURSO")
+	scanner := bufio.NewScanner(os.Stdin)
+
+	fmt.Print("Enter Name: ")
+	scanner.Scan()
+	copy(newCourse.Name[:],scanner.Bytes())
+
+	fmt.Print("Enter ID: ")
+	scanner.Scan()
+	i64,_:= strconv.ParseInt(scanner.Text(),10,32)
+	newCourse.Id = int32(i64)
+
+	fmt.Print("Enter Code: ")
+	scanner.Scan()
+	i64,_= strconv.ParseInt(scanner.Text(),10,32)
+	newCourse.Code = int32(i64)
+
+	fmt.Print("Enter Type: ")
+	scanner.Scan()
+	newCourse.Type,_ = strconv.ParseBool(scanner.Text())
+
+	fmt.Println("Object to write:",newCourse)
+	
+	file, err := openFile(fileName)
 	if err != nil {
-		fmt.Println("Invalid input. Please enter a number.")
-		return 
+		return
 	}
+
+	// Write object in bin file
+	if err := writeObjectToFile(file,newCourse,currentOffset); err != nil {
+		return
+	}
+	currentOffset += int64(binary.Size(newCourse))
+
+	readAll(file)
+	// var tempCourse Course
+
+	// if err := ReadObject(file, &tempCourse, int64(0*binary.Size(tempCourse) + 0)); err != nil {
+	// 	return
+	// }
+
+	// printObject(tempCourse)
+
+	// if err := ReadObject(file, &tempCourse, int64(1*binary.Size(tempCourse) + 0)); err != nil {
+	// 	return
+	// }
+
+	// printObject(tempCourse)
+	// // Writing 10 objects to the file
+	// for i := 0; i < 10; i++ {
+	// 	// Set values to newData
+	// 	copy(newData.Name[:], "Sergie")
+	// 	newData.Id = int32(i+1)
+
+	// 	// Write object in bin file
+	// 	if err := writeObjectToFile(file,newData,int64(i * binary.Size(newData))); err != nil {
+	// 		return
+	// 	}
+	// }
+
+	// // Read 10 objects from bin file
+	// for i := 0; i < 10; i++ {
+	// 	var TempData Course
+	// 	// Read object from bin file
+	// 	if err := ReadObject(file, &TempData, int64(i * binary.Size(TempData) + 0)); err != nil {
+	// 		return
+	// 	}
+
+	// 	// Print object
+	// 	PrintData(TempData)
+	// }
+	
+
+	// Close bin file
+	defer file.Close()
+}
+
+func writeObjectToFile(file *os.File, data interface{}, offset  int64) error {
+	tempOffset, _ := file.Seek(offset, 0)
+	fmt.Println("Last Offset: ",tempOffset)
+
+	err := binary.Write(file, binary.LittleEndian, data)
+	if err != nil {
+		fmt.Println("Err WriteObject==",err)
+		return err
+	}
+	return nil
+}
+
+func ReadObject(file *os.File, data interface{}, offset  int64) error {
+	file.Seek(offset, 0)
+	err := binary.Read(file, binary.LittleEndian, data)
+	if err != nil {
+		fmt.Println("Err ReadObject==",err)
+		return err
+	}
+	return nil
+}
+
+func readAll(file *os.File) error {
+	var tempCourse Course
+
+	tempOffset, _ := file.Seek(0, 0)
+
+	for {
+		
+		err := binary.Read(file, binary.LittleEndian, &tempCourse)
+		if err != nil {
+			log.Print(err)
+			fmt.Println("Err ReadObject==",err)
+			break
+		}else {
+			printObject(tempCourse)
+
+			tempOffset,_= file.Seek(tempOffset+int64(binary.Size(tempCourse)),0)
+			fmt.Println("Last Offset: ",tempOffset)
+		}
+
+	}
+	return nil
+}
+
+func updateWritePointer(file *os.File) error {
+	var tempCourse Course
+
+	tempOffset, _ := file.Seek(0, 0)
+
+	for {
+		
+		err := binary.Read(file, binary.LittleEndian, &tempCourse)
+		if err != nil {
+			fmt.Println("Err ReadObject==",err)
+			currentOffset = tempOffset
+			break
+		}else {
+			tempOffset,_= file.Seek(tempOffset+int64(binary.Size(tempCourse)),0)
+			currentOffset = tempOffset
+			fmt.Println("Last Offset: ",tempOffset)
+		}
+
+	}
+	return nil
+}
+
+func printObject(data Course){
+	// fmt.Println(fmt.Sprintf("Name: %s, id: %d", string(data.Name[:]), data.Id))
+	fmt.Println("Course")
+	fmt.Printf("Name: %s \nId: %d \nType %v \nCode %d \n",string(data.Name[:]),data.Id, data.Type, data.Code)
 }
 
 func getUserInput(prompt string) int {
@@ -141,6 +323,7 @@ func openFile(filePath string)(*os.File, error){
 func readFile(filePath string) error{
 	
 	file, err := openFile(filePath)
+	defer file.Close()
 
 	if err != nil {
 		return err

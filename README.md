@@ -15,6 +15,11 @@ Writte in file
 Read and recover the file content and print it out 
 exit the application
 
+## Go documentation 
+
+[Go documentation index](https://go.dev/doc/)
+[Go language specification](https://go.dev/ref/spec)
+[Tips for writting Go code](https://go.dev/doc/effective_go)
 
 # Homework #1 
 
@@ -159,12 +164,6 @@ Mode: r (read), w(write), x(execute)
 If you create a file without a prior check if the file exist it will override it and create a new one, deleting all the content
 of the named file.
 
-# Structs
-
-[Go Structs](https://go.dev/tour/moretypes/2)
-A struct is a collection of fields.
-
-
 # OpenFIle
 
 ## Constants for file permissions
@@ -245,3 +244,67 @@ We can run the following snippet in a go console program and check the results.
 	*p = *p / 37   // divide j through the pointer
 	fmt.Println(j) // see the new value of j
 ```
+
+### Squashing a commit and push them to github
+
+[About git rebase in GitHub](https://docs.github.com/en/get-started/using-git/about-git-rebase)
+
+It's considered bad practice to rebase commits when you've already pushed to a repository
+
+[Pushing rebased code to GitHub](https://docs.github.com/en/get-started/using-git/using-git-rebase-on-the-command-line#pushing-rebased-code-to-github)
+
+
+# Structs
+
+[Structs in C](https://www.w3schools.com/c/c_structs.php)
+
+Structures (also called `structs`) are a way to group several related variables into one place. Each variable in the structure is known as a `member` of the structure.
+
+Structs are useful ways of creating a template for storing information about a real life object.
+
+[Go Structs](https://go.dev/tour/moretypes/2)
+
+A struct is a collection of fields. Struct `fields` are accessed using a dot.
+e.g
+```go
+//declaring
+type Vertex struct {
+	X int
+	Y int
+}
+//accessing
+v := Vertex{1, 2}
+v.X = 4
+fmt.Println(v.X)
+```
+## Structs and pointers
+
+You can access fields of a struct via a struct `pointer`. E.g `*p.X` 
+However, that is a cumbersome notation, we can change that and instead write this.
+e.g `p.X` without the asterisk symbol (`deference`)
+
+```go
+v := Vertex{1, 2}
+p := &v
+p.X = 20
+fmt.Println(v)
+```
+Output
+```bash
+{20 2}
+```
+
+## Copy bytes from a string to a slice of bytes
+
+[Package builtin.copy](https://pkg.go.dev/builtin#copy)
+
+Copies elemenents from a source slice into a destination slice. (As a special case, it also will copy bytes from a `string` to a slice of bytes.).
+
+## The empty interface
+
+[The empty interface](https://go.dev/tour/methods/14)
+
+The empty interface `interface{}` may hold values of any type, they are used by code
+that handles values of unknown type. e.g fmt.Print(*interface{}), takes any number of 
+arguments of type interface{}.
+
