@@ -8,6 +8,7 @@ import (
 	"os"
 	fp "path/filepath"
 	"strconv"
+	"strings"
 )
 
 // 1. Object Course
@@ -30,12 +31,14 @@ type Course struct{
 
 var fileName string  = "./ht/test.txt" 
 var currentOffset int64
+var currentId int32
 
 func main(){
 	if ifFilePathExist(fileName) == false {
 		createDirectory(fileName)
 		createFile(fileName)
 		currentOffset = 0
+		currentId = 0
 	}else{
 		file, err := openFile(fileName)
 		if err != nil {
@@ -60,7 +63,6 @@ func menu() {
 
 		switch option {
 		case 1:
-			fmt.Println("Create a default file called testFIle.txt")
 			courseRegister()
 		case 2:
 			fmt.Println("Showing database...")
@@ -86,20 +88,8 @@ func showRegisters(){
 }
 
 func courseRegister(){
-	
-	// type Course struct{
-	// 	Type bool
-	// 	Id int32
-	// 	Code int32
-	// 	Name [16]byte
-	// }
-	
-	var newCourse Course
-	// newCourse.Type = true
-	// newCourse.Id = 0
-	// newCourse.Code = 2020
-	// copy(newCourse.Name[:],"Archivos")
 
+	var newCourse Course
 
 	// Prompt the user for input
 	fmt.Println("REGISTRO DE CURSO")
@@ -109,14 +99,16 @@ func courseRegister(){
 	scanner.Scan()
 	copy(newCourse.Name[:],scanner.Bytes())
 
-	fmt.Print("Enter ID: ")
-	scanner.Scan()
-	i64,_:= strconv.ParseInt(scanner.Text(),10,32)
-	newCourse.Id = int32(i64)
+	// fmt.Print("Enter ID: ")
+	// scanner.Scan()
+	// i64,_:= strconv.ParseInt(scanner.Text(),10,32)
+	// newCourse.Id = int32(i64)
+	newCourse.Id = currentId + 1
+	currentId += 1;
 
 	fmt.Print("Enter Code: ")
 	scanner.Scan()
-	i64,_= strconv.ParseInt(scanner.Text(),10,32)
+	i64,_:= strconv.ParseInt(scanner.Text(),10,32)
 	newCourse.Code = int32(i64)
 
 	fmt.Print("Enter Type: ")
@@ -206,6 +198,11 @@ func readAll(file *os.File) error {
 
 	tempOffset, _ := file.Seek(0, 0)
 
+	fmt.Println(strings.Repeat("-",60))
+	fmt.Println("\t\t   COURSE'S TABLE ")
+	fmt.Println(strings.Repeat("-",60))
+	fmt.Printf("| %5s%-5s | %12s%-8s | %8s%-5s | %5s%-5s \n", "ID","", "NAME","", "CODE","","TYPE","")
+
 	for {
 		
 		err := binary.Read(file, binary.LittleEndian, &tempCourse)
@@ -217,7 +214,6 @@ func readAll(file *os.File) error {
 			printObject(tempCourse)
 
 			tempOffset,_= file.Seek(tempOffset+int64(binary.Size(tempCourse)),0)
-			fmt.Println("Last Offset: ",tempOffset)
 		}
 
 	}
@@ -233,13 +229,15 @@ func updateWritePointer(file *os.File) error {
 		
 		err := binary.Read(file, binary.LittleEndian, &tempCourse)
 		if err != nil {
+			fmt.Printf("Last id: %d next id: %d\n",tempCourse.Id,tempCourse.Id+1)
 			fmt.Println("Err ReadObject==",err)
 			currentOffset = tempOffset
+			currentId = tempCourse.Id
 			break
 		}else {
 			tempOffset,_= file.Seek(tempOffset+int64(binary.Size(tempCourse)),0)
 			currentOffset = tempOffset
-			fmt.Println("Last Offset: ",tempOffset)
+			fmt.Println("Updating position: ",tempOffset)
 		}
 
 	}
@@ -248,8 +246,12 @@ func updateWritePointer(file *os.File) error {
 
 func printObject(data Course){
 	// fmt.Println(fmt.Sprintf("Name: %s, id: %d", string(data.Name[:]), data.Id))
-	fmt.Println("Course")
-	fmt.Printf("Name: %s \nId: %d \nType %v \nCode %d \n",string(data.Name[:]),data.Id, data.Type, data.Code)
+
+	//fmt.Printf("%d %s %v %d \n",data.Id,string(data.Name[:]),data.Type, data.Code)
+
+	//fmt.Printf("| %5d%-5s | %12s%-13s | %8d%-5s | %5v%-5s \n",data.Id,"", string(data.Name[:]),"",data.Code,"",data.Type,"")
+
+	fmt.Printf("| %d \t     |\t %s %s \t|\t %d \t|\t %v \t \n",data.Id, string(data.Name[:])," ",data.Code,data.Type)
 }
 
 func getUserInput(prompt string) int {
@@ -283,9 +285,6 @@ func ifFilePathExist(filePath string) bool{
 	exist := false
 
 	_, err := os.Stat(filePath)
-
-	fmt.Printf("%T",err)
-	fmt.Println(err)
 
 	if err == nil {
 		fmt.Println("File or directory exists.")

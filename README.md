@@ -308,3 +308,6 @@ The empty interface `interface{}` may hold values of any type, they are used by 
 that handles values of unknown type. e.g fmt.Print(*interface{}), takes any number of 
 arguments of type interface{}.
 
+If you input a string a type int field the default value will be 0.
+If you input true in a bool field the value will be 1 other number different than 1 will be 0.
+
