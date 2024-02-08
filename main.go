@@ -19,7 +19,7 @@ type Course struct{
 }
 
 
-var fileName string  = "./ht/test.txt" 
+var fileName string  = "./ht/ht1.bin" 
 var currentOffset int64
 var currentId int32
 
@@ -116,7 +116,7 @@ func courseRegister(){
 	}
 
 	// Write object in bin file
-	if err := writeObjectToFile(file,newCourse,currentOffset); err != nil {
+	if err := writeObjectToFile(file,&newCourse,currentOffset); err != nil {
 		return
 	}
 	currentOffset += int64(binary.Size(newCourse))
@@ -128,7 +128,7 @@ func courseRegister(){
 
 func writeObjectToFile(file *os.File, data interface{}, offset  int64) error {
 	file.Seek(offset, 0)
-	
+
 	err := binary.Write(file, binary.LittleEndian, data)
 	if err != nil {
 		fmt.Println("Err WriteObject==",err)
@@ -272,6 +272,8 @@ func openFile(filePath string)(*os.File, error){
 	return file, nil
 }
 
+//this function is for reading the content of a file line by line.
+//It doesn't work for this app un less you would like to read content of a single text file.
 func readFile(filePath string) error{
 	
 	file, err := openFile(filePath)

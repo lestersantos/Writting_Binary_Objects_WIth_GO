@@ -58,7 +58,7 @@ exit status 1
 
 ## Creating a file with Go and check if the path exist or not
 
-## About Absolute and Relative paths
+### About Absolute and Relative paths
 
 [Absolute and Relative paths](https://www.linkedin.com/pulse/difference-between-absolute-path-relative-linux-waqas-muazam#:~:text=Absolute%20paths%20always%20start%20with,relative%20to%20the%20current%20directory.)
 
@@ -66,13 +66,13 @@ An absolute path is a complete path to a file or directory from the `root direct
 
 A relative path is a path to a file or directory that is relative to the `current directory`. 
 
-## The `filepath` package
+### The `filepath` package
 
 [Package filepath](https://pkg.go.dev/path/filepath@go1.21.6)
 
 Package filepath help us manipulate filename paths.
 
-## Cleaning path string with `filepath.Dir function`
+### Cleaning path string with `filepath.Dir function`
 
 [Go package filepath function Dir](https://pkg.go.dev/path/filepath#Dir)
 
@@ -294,6 +294,77 @@ Output
 {20 2}
 ```
 
+# Reading input from the terminal 
+
+[bufio package](https://pkg.go.dev/bufio#pkg-overview)
+
+Package `bufio` implements buffered I/O. 
+
+[buffio.NewScanner](https://pkg.go.dev/bufio#NewScanner) 
+
+NewScanner returns a new `Scanner` to read from the os.Stdin
+
+[Scanner](https://pkg.go.dev/bufio#Scanner)
+
+The Scanner struct, provides an interface for reading data such as a file of `newline-delimited` lines of text. It uses the `Scanner.Scan` method to advance to the next token, then you can read the data availabel with `Scanner.Bytes` or `Scanner.Text`.
+
+Whe can code the implementation of `bufio` with a new instance of `Scanner` reading 
+from the `os.Stdin` E.g
+
+```go
+scanner := bufio.NewScanner(os.Stdin)
+scanner.Scan()
+input, err := strconv.Atoi(scanner.Text())
+```
+
+## Reading input from terminal with `Scanln`
+
+This form isn't useful for this specific case, but it is good to know how it works for futures scenarios, I learn a few thing using this way of reading, and helped me to recalled some `C` 
+programming language.
+
+We can read input from `stdin` with the function `fmt.Scanln`, this functions are from the package `fmt` and they are analogous to `C's` `cstdio` library, Go doesn't give enough documentation
+about their functions, so for understanding the principles we can use the `C's` documentation found here [CSTDIO SCANF](https://cplusplus.com/reference/cstdio/scanf/).
+
+Reading from terminal will look like this:
+
+```go
+fmt.Print("Enter Name: ")
+fmt.Scanln(&data.Name)
+```
+
+Unfortunately this will only store `space-separated values` into arguments passed to scanln, so if we wanted to store all the text in a line we would have to do a another more extense procedure.
+
+# Wrtting a struct into a file in byte form (Seralization)
+
+[Objects serialization](https://crashtest-security.com/java-serialization/)
+
+Seralization is converting objects into byte streams that can be stored, shared, and used to reconstruct the objects, it allows for data exchange between devices running on different hosts.
+
+## The binary package in Go
+
+[Package binary](https://pkg.go.dev/encoding/binary#pkg-overview)
+
+Implements simple transalation between numbers and byte sequences. For implementing transalation with `binary` the package requires `fixed-size values`.
+e.g: bool(1 or 0), int8, int16, int32 etc. In our case our struct must have fixed-size values which means fields of type `string` won't be allowed, we must use 
+variables of type `byte` specifying the number of bytes for the string. e.g
+
+```go
+Name [16]byte
+```
+
+Go doesn't have a type `char` variable but a `char` takes up exactly `1 byte` of memory. [Char, Shorts, Int and Long Types](https://docs.mql4.com/basis/types/integer/integertypes)
+
+After successfully saved our data into each struct field with fixed-size values we can write the struct into our `file` with the following
+statement.
+
+```go
+err := binary.Write(file, binary.LittleEndian, data)
+```
+- `file` is a type `*File` which can be obtained from opening a file with the function `os.OpenFIle`
+- `binary.LittleEndian` is a ByteOrder value, for this case we use the default value of `LittleEndian`
+   a more specified defintion can be found here [Little Endian Constant](https://docs.oracle.com/javase/8/docs/api/java/nio/ByteOrder.html)
+- `data` must be a fixed-size value, or a slice of fixed-size values, or a pointer to such data. e.g An instance of a struct `newCourse`, or the addres of the instance `&newCourse`
+
 ## Copy bytes from a string to a slice of bytes
 
 [Package builtin.copy](https://pkg.go.dev/builtin#copy)
@@ -310,4 +381,15 @@ arguments of type interface{}.
 
 If you input a string a type int field the default value will be 0.
 If you input true in a bool field the value will be 1 other number different than 1 will be 0.
+
+
+When we declare a variable in `C` and we pass the variable to a function, it will be passed by value
+Only the value will be send, a copy of that value will be store in a variable which is delcared in the parameter lis of
+the function, and you can change that value whithin the scope of the function, but when the functions is done.
+
+The original value inside that variable won't be changed.
+
+Now if we instead pass the address of that variable then we can change the paremete of the function and declare a pointer which
+will store the address of the original variable, and when we dereference that address we can access to the data stored in that
+particular memory cell, and we can change the original value.
 
