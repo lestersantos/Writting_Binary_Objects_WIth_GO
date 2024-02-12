@@ -56,6 +56,9 @@ open /newDIr/testFIle.txt: no such file or directory
 exit status 1
 ```
 
+If you create a file without a prior check if the file exist it will override it and create a new one, deleting all the content
+of the named file.
+
 ## Creating a file with Go and check if the path exist or not
 
 ### About Absolute and Relative paths
@@ -161,8 +164,7 @@ Mode: r (read), w(write), x(execute)
 - Numerical: 0754 four digits for 3 groups and 1 special flag.
 - Symbolic: reference class [operator] [mode]
 
-If you create a file without a prior check if the file exist it will override it and create a new one, deleting all the content
-of the named file.
+
 
 # OpenFIle
 
